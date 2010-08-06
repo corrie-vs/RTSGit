@@ -51,7 +51,8 @@ enum LED_STATE{
 	BLUE_FADE_OUT,
 	WHITE_FADE_OUT,
 	BOTH_FADE_IN,
-	BOTH_FADE_OUT
+	BOTH_FADE_OUT,
+        RESET
 };
 //===================this is for slave RFBee==================
 
@@ -118,7 +119,7 @@ void loop(){
 void rfBeeInit(){
 	DEBUGPRINT()
 
-		CCx.PowerOnStartUp();
+        CCx.PowerOnStartUp();
 	setCCxConfig();
 
 	serialMode=SERIALDATAMODE;
@@ -231,6 +232,9 @@ void processRFBeeData( byte RFData)
 	case BOTH_FADE_OUT:
 		ledControl(blue, FADE_OUT, white, FADE_OUT);//both fade out
 		break;
+        case RESET:
+                Serial.println("Resetting RFBee.");
+                setup();
 	default:
 		break;										
 	}
