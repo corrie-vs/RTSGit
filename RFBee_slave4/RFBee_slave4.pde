@@ -1,19 +1,20 @@
 /******* Reflecting the Stars *********
-Prototype Test 3 - SLAVE CODE
-Version: 0.1.3
+Prototype Test 4 - SLAVE CODE
+Version: 0.1.4
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
-Date: August 01, 2010
+Date: August 05, 2010
 ----------------------
 Light Display Modes:
 - Pulse Mode.
 - Tx Reset Commands.
+- Sleep.
 **************************************/
 
 /***************** Early Definitions ******************/
 #define FIRMWAREVERSION 11 // 1.1	, version number needs to fit in byte (0~255) to be able to store it into config
 
 #define RTS_ID 2           // The Unique ID of this RFBee.
-char versionblurb[100] = "v.3 - Reset Commands - SLAVE"; 
+char versionblurb[100] = "v.4 - Rx Sleep when Lonely - SLAVE"; 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
@@ -37,6 +38,10 @@ char versionblurb[100] = "v.3 - Reset Commands - SLAVE";
 #define SolarValue 0
 #define FADE_IN 0
 #define FADE_OUT 1
+
+#define rx_lonely_sleep 30000 // Amount of loops to go through without Tx before the Rx goes to sleep.
+int rx_lonely_counter=0;
+int misc_counter=0;
 
 //led states to be controlled to
 enum LED_STATE{
@@ -85,14 +90,37 @@ void loop(){
 	// Serial.print(".");
 	byte result = 0;
 	byte response = 'K';
+        
+        misc_counter++;
+        
+        // Listen for Tx Signals.
 	if ( digitalRead(GDO0) == HIGH ) {
                 Serial.print("Rx ==> ");
+                rx_lonely_counter=0;
 		result = waitAndReceiveRFBeeData();
 	}
+        else {    // If no Tx, we're either under water or just not active so go to sleep.
+          if(misc_counter%12 == 0) {
+            misc_counter=0;
+            rx_lonely_counter++;
+            if(rx_lonely_counter%10000 == 0) {
+              Serial.print("Lonely Counter: ");
+              Serial.println(rx_lonely_counter/10000, DEC);
+            }
+          }
+        }
 	if( result != 0){
 		transmitData(&response,1,Config.get(CONFIG_MY_ADDR),1);//transmit 'K' to the master repersenting 'ok'
 		processRFBeeData(result);
 	}
+
+        // Lonely Timer - for when the Rx no longer hears from the Tx, it will go to sleep.
+        if((rx_lonely_counter == rx_lonely_sleep)) {
+          Serial.println("");
+          Serial.println("Going to Sleep...");
+          TurnOffLightsNice();
+          lowPowerOn();    // Only drops to 20ma from 24ma operating
+        }
 	/*
 	if (Serial.available() > 0){
 	 sleepCounter=1000; // reset the sleep counter
@@ -187,6 +215,14 @@ void ledControl(int pinNum1, int control1, int pinNum2, int control2)
 		}
 		delay(30);
 	}
+}
+
+
+void TurnOffLightsNice() {
+ if(analogRead(white) > 120)
+  ledControl(white, FADE_OUT, 0, FADE_OUT); //blue fade out, white unchanged
+ if(analogRead(blue) > 120)
+  ledControl(blue, FADE_OUT, 0, FADE_OUT); //blue fade out, white unchanged
 }
 
 void processRFBeeData( byte RFData)
