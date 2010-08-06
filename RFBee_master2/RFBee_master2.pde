@@ -1,20 +1,12 @@
-//  Firmware for rfBee 
-//  see www.seeedstudio.com for details and ordering rfBee hardware.
-
-//  Copyright (c) 2010 Hans Klunder <hans.klunder (at) bigfoot.com>
-//  Author: Hans Klunder, based on the original Rfbee v1.0 firmware by Seeedstudio
-//  Version: July 14, 2010
-//
-//  This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
-//  as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-//  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//  See the GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License along with this program; 
-//  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
+/******* Reflecting the Stars *********
+Prototype Test 2 - MASTER CODE
+Version: 0.1.2
+Authors: Richard Schwab, Corrie Van Sice, Icing Chang
+Date: August 04, 2010
+----------------------
+Light Display Modes:
+- Pulse Mode.
+**************************************/
 
 
 #define FIRMWAREVERSION 11 // 1.1  , version number needs to fit in byte (0~255) to be able to store it into config
@@ -48,14 +40,17 @@ enum LED_STATE{
   BLUE_FADE_OUT,
   WHITE_FADE_OUT,
   BOTH_FADE_IN,
-  BOTH_FADE_OUT
+  BOTH_FADE_OUT,
+  RESET
 };
+
+byte len = 1;              // Length of data to be sent
 
 //================this is for Master RFBee======================
 
 void setup(){
   //do extra initalization
-  Config.set(CONFIG_MY_ADDR,1);//specify an unique address 1 for Master RFBee 
+  Config.set(CONFIG_MY_ADDR,0);//specify an unique address 1 for Master RFBee 
   setMyAddress();
   Config.set(CONFIG_ADDR_CHECK,1);
   setAddressCheck();
@@ -78,28 +73,65 @@ void setup(){
 
 void loop(){
   //comment this when as a Master
-  byte len = 1;              // Length of data to be sent
-  static byte destAddr = 2;  // Initial with address 2
-  byte maxSlaveAddr = 4;     // The Maximum amount of Slaves in this Network
+ 
+  static byte destAddr = 1;     // Initial with address 1
+  byte maxSlaveAddr = 30;       // The Maximum amount of Slaves in this Network
   unsigned long startTime;  
   byte response = 0;
   static byte allOver = 0;
   
+  switch(allOver) {
+    case 0: 
+      serialData[0] = WHITE_FADE_IN;    //choose from LED_STATE
+      Serial.print(destAddr, DEC);
+      Serial.println(" White..");
+      break;
+      
+    case 1:
+      serialData[0] = WHITE_FADE_OUT;
+      //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
+      break;
+   
+    case 2:
+      serialData[0] = BLUE_FADE_IN;
+      Serial.print(destAddr, DEC);
+      Serial.println(" Blue..");
+      //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
+      break;
+  
+    case 3:
+      //delay(250);
+      serialData[0] = BLUE_FADE_OUT;
+      //serialData[0] = WHITE_FADE_OUT;
+      break;
+    case 4:
+      serialData[0] = RESET;
+      break;
+  }
+  
+  transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);  //Config.get(CONFIG_DEST_ADDR));//transmit
+  
+  //serialData[0] = BOTH_OFF;
+  //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);  //Config.get(CONFIG_DEST_ADDR));//transmit 
+ 
+ /* 
   if(0 == allOver) {
-    serialData[0] = BOTH_FADE_IN;    //choose from LED_STATE
-    Serial.println("Fading In..");
+    
+    serialData[0] = BLUE_FADE_IN;
+     Serial.println("Fading Out Blue..");
   }
   else {
-     serialData[0] = BOTH_FADE_OUT;
-     Serial.println("Fading Out..");
-  } 
+     serialData[0] = BLUE_FADE_OUT;
+     Serial.println("Fading Out Blue..");
+     delay(1000);  //have some delay
+     serialData[0] = WHITE_FADE_IN;
+     Serial.println("Fading Out Blue..");
+  } */
   //Config.set(CONFIG_DEST_ADDR,destAddr);//it's unnecessary   
-  transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
   
-  
-  
+ /* 
   startTime= millis();
-  while((millis() >= startTime)&&(millis() - startTime < 2000))
+  while((millis() >= startTime)&&(millis() - startTime < 20))
   {
     if ( digitalRead(GDO0) == HIGH ){
       if(1 == waitAndProcessRFBeeData()){
@@ -107,22 +139,28 @@ void loop(){
         break;
       }
     }
-  }
+  }*/
   //if( 0 == response )
     //return;
     
   destAddr++;//increase the destination address
-
+  //delay(1000);
   if(destAddr>maxSlaveAddr){// when reach the max address, return to 2
-    destAddr = 2;
-    allOver = 1 - allOver;
+    destAddr = 1;
+    //allOver = 1 - allOver;    // if you only have two cases for allOver (0 and 1)
+    if(allOver==4)
+      allOver=0;
+    else
+      allOver++;
+    
+    delay(2000);
   }
   
-  Serial.println("Sending to: ");
-  Serial.println(destAddr, DEC);
+  //Serial.println("Sending to: ");
+  //Serial.println(destAddr, DEC);
   //Serial.println(destAddr, BYTE);
   
-  delay(1000);//have some delay
+  //delay(500);//have some delay
   /*
   if (Serial.available() > 0){
     sleepCounter=1000; // reset the sleep counter
@@ -163,6 +201,9 @@ void rfBeeInit(){
     attachInterrupt(0, ISRVreceiveData, RISING);  //GD00 is located on pin 2, which results in INT 0
     pinMode(GDO0,INPUT);// used for polling the RF received data
 
+    //serialData[0] = BOTH_FADE_OUT;
+    //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),3);//Config.get(CONFIG_DEST_ADDR));//transmit 
+  
 
 }
 
