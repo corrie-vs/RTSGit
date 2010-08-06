@@ -96,7 +96,7 @@ void loop(){
     case 0: 
       serialData[0] = WHITE_FADE_IN;    //choose from LED_STATE
       Serial.print(current_RFBee, DEC);
-      Serial.println(" White..");
+      Serial.print(" White..");
       break;
       
     case 1:
@@ -107,7 +107,7 @@ void loop(){
     case 2:
       serialData[0] = BLUE_FADE_IN;
       Serial.print(current_RFBee, DEC);
-      Serial.println(" Blue..");
+      Serial.print(" Blue..");
       //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
       break;
   
@@ -118,9 +118,11 @@ void loop(){
       break;
     case 4:
       serialData[0] = RESET;
+      Serial.print(" Resetting..");
       break;
   }
   
+  Serial.println(" Tx ==> ");
   transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),current_RFBee);  //Config.get(CONFIG_DEST_ADDR));//transmit
   
   //serialData[0] = BOTH_OFF;

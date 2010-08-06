@@ -85,6 +85,7 @@ void loop(){
 	byte result = 0;
 	byte response = 'K';
 	if ( digitalRead(GDO0) == HIGH ) {
+                Serial.print("Rx ==> ");
 		result = waitAndReceiveRFBeeData();
 	}
 	if( result != 0){
