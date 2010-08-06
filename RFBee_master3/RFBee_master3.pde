@@ -18,8 +18,8 @@ byte Last_RFBee=30;       // The Maximum amount of Slaves in this Network
 char versionblurb[100] = "v.3 - Reset Commands - MASTER";
 static byte current_RFBee;
 
-#define Tx_Reset_Limit 100     // After 100 Txs the RFBee should be reset. BECAUSE ITS AN RFBEE.
-#define Tx_Reboot_Limit 10000  // After 10000 Txs the RFBee should have its EEProm wiped because that seems to help too.
+#define Tx_Reset_Limit 1000     // After 100 Txs the RFBee should be reset. BECAUSE ITS AN RFBEE.
+#define Tx_Reboot_Limit 100000  // After 10000 Txs the RFBee should have its EEProm wiped because that seems to help too.
 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
@@ -60,6 +60,7 @@ enum LED_STATE{
 };
 
 byte len = 1;              // Length of data to be sent
+static byte allOver = 0;
 
 //================this is for Master RFBee======================
 
@@ -86,15 +87,16 @@ void setup(){
     Serial.println(versionblurb);
     Serial.println("ok");
     current_RFBee = First_RFBee;     // Setup Initial RFBee Address.
+    allOver = 0;
 }
 
 void loop(){
   //comment this when as a Master
  
   unsigned long startTime;
-  unsigned long tx_counter = 0;      // Monitors # of Txs for reset purposes.  
+  static long tx_counter = 1;      // Monitors # of Txs for reset purposes.  
   byte response = 0;
-  static byte allOver = 0;
+  
   
   
   switch(allOver) {
@@ -124,8 +126,10 @@ void loop(){
       //serialData[0] = WHITE_FADE_OUT;
       break;
     case 4:
-      serialData[0] = RESET;
-      Serial.print("R ");
+      if(tx_counter%Tx_Reset_Limit == 0) {
+        serialData[0] = RESET;
+        Serial.print("R ");
+      }
       break;
     case 5:
       if(tx_counter%Tx_Reboot_Limit == 0) {
@@ -138,6 +142,7 @@ void loop(){
   //Serial.println(" Tx ==> ");
   tx_counter++;
   transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),current_RFBee);  //Config.get(CONFIG_DEST_ADDR));//transmit
+  //Serial.print(tx_counter);
   
   // Tx Auto Reset & Reboot Code.
   if(tx_counter%Tx_Reset_Limit == 0) {
