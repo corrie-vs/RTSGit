@@ -55,7 +55,8 @@ enum LED_STATE{
   WHITE_FADE_OUT,
   BOTH_FADE_IN,
   BOTH_FADE_OUT,
-  RESET
+  RESET,
+  REBOOT
 };
 
 byte len = 1;              // Length of data to be sent
@@ -124,7 +125,13 @@ void loop(){
       break;
     case 4:
       serialData[0] = RESET;
-      Serial.print("R");
+      Serial.print("R ");
+      break;
+    case 5:
+      if(tx_counter%Tx_Reboot_Limit == 0) {
+        serialData[0] = REBOOT;
+        Serial.print("RB");
+      }
       break;
   }
   

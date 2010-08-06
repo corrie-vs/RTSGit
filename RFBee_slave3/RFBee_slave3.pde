@@ -52,7 +52,8 @@ enum LED_STATE{
 	WHITE_FADE_OUT,
 	BOTH_FADE_IN,
 	BOTH_FADE_OUT,
-        RESET
+        RESET,
+        REBOOT
 };
 //===================this is for slave RFBee==================
 
@@ -237,6 +238,12 @@ void processRFBeeData( byte RFData)
                 Serial.println("Resetting RFBee.");
                 Serial.println("");
                 setup();
+                break;
+        case REBOOT:
+                Serial.println("Rebooting RFBee (EEProm).");
+                Serial.println("");
+                Config.reset();
+                break;
 	default:
 		break;										
 	}
