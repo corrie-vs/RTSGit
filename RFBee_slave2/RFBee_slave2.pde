@@ -10,6 +10,7 @@ Light Display Modes:
 
 
 #define FIRMWAREVERSION 11 // 1.1	, version number needs to fit in byte (0~255) to be able to store it into config
+#define RTS_ID 2           // The Unique ID of this RFBee.
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
@@ -53,7 +54,7 @@ enum LED_STATE{
 
 void setup(){
 	//do extra initalization
-	Config.set(CONFIG_MY_ADDR,20);			//modify the numberf to specify an unique address for RFBee itself 
+	Config.set(CONFIG_MY_ADDR,RTS_ID);			//modify the numberf to specify an unique address for RFBee itself 
 	setMyAddress();
 	Config.set(CONFIG_ADDR_CHECK,2);	 //set slave RFBee with adress checking and broadcast
 	setAddressCheck();

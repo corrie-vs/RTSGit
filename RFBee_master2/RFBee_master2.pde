@@ -10,6 +10,7 @@ Light Display Modes:
 
 
 #define FIRMWAREVERSION 11 // 1.1  , version number needs to fit in byte (0~255) to be able to store it into config
+#define RTS_ID 0          // The Unique ID of this RFBee.
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
@@ -50,7 +51,7 @@ byte len = 1;              // Length of data to be sent
 
 void setup(){
   //do extra initalization
-  Config.set(CONFIG_MY_ADDR,0);//specify an unique address 1 for Master RFBee 
+  Config.set(CONFIG_MY_ADDR,RTS_ID);//specify an unique address 1 for Master RFBee 
   setMyAddress();
   Config.set(CONFIG_ADDR_CHECK,1);
   setAddressCheck();
