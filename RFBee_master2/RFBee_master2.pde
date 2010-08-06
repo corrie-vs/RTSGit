@@ -10,7 +10,10 @@ Light Display Modes:
 
 
 #define FIRMWAREVERSION 11 // 1.1  , version number needs to fit in byte (0~255) to be able to store it into config
+
 #define RTS_ID 0          // The Unique ID of this RFBee.
+char versionblurb[100] = "v.2 - Pulse Mode - MASTER"; 
+
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
@@ -69,6 +72,7 @@ void setup(){
     }
     setUartBaudRate();
     rfBeeInit();
+    Serial.println(versionblurb);
     Serial.println("ok");
 }
 
