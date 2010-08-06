@@ -235,6 +235,7 @@ void processRFBeeData( byte RFData)
 		break;
         case RESET:
                 Serial.println("Resetting RFBee.");
+                Serial.println("");
                 setup();
 	default:
 		break;										
