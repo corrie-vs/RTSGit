@@ -160,7 +160,7 @@ void loop(){
   if(current_RFBee > Last_RFBee) {      // when reach the max address, return to 2
     current_RFBee = First_RFBee;
     //allOver = 1 - allOver;    // if you only have two cases for allOver (0 and 1)
-    if(allOver==5)
+    if(allOver==4)
       allOver=0;
     else
       allOver++;
