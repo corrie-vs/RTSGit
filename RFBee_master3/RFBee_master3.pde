@@ -1,29 +1,37 @@
 /******* Reflecting the Stars *********
-Prototype Test 2 - MASTER CODE
-Version: 0.1.2
+Prototype Test 3 - MASTER CODE
+Version: 0.1.3
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
 Date: August 04, 2010
 ----------------------
 Light Display Modes:
 - Pulse Mode.
+- Tx Reset Commands.
 **************************************/
 
-
+/***************** Early Definitions / Variables ******************/
 #define FIRMWAREVERSION 11 // 1.1  , version number needs to fit in byte (0~255) to be able to store it into config
 
 #define RTS_ID 0          // The Unique ID of this RFBee.
-char versionblurb[100] = "v.2 - Pulse Mode - MASTER"; 
+byte First_RFBee=1;        // The first RFBee ID in our network
+byte Last_RFBee=30;       // The Maximum amount of Slaves in this Network
+char versionblurb[100] = "v.3 - Reset Commands - MASTER";
+static byte current_RFBee;
+    
 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
+/*****************************************************/
 
-
+/************************* Includes ******************/
 #include "debug.h"
 #include "globals.h"
 #include "Config.h"
 #include "CCx.h"
 #include "rfBeeSerial.h"
+/*****************************************************/
+
 
 #ifdef FACTORY_SELFTEST
 #include "TestIO.h"  // factory selftest
@@ -74,13 +82,12 @@ void setup(){
     rfBeeInit();
     Serial.println(versionblurb);
     Serial.println("ok");
+    current_RFBee = First_RFBee;     // Setup Initial RFBee Address.
 }
 
 void loop(){
   //comment this when as a Master
  
-  static byte destAddr = 1;     // Initial with address 1
-  byte maxSlaveAddr = 30;       // The Maximum amount of Slaves in this Network
   unsigned long startTime;  
   byte response = 0;
   static byte allOver = 0;
@@ -88,7 +95,7 @@ void loop(){
   switch(allOver) {
     case 0: 
       serialData[0] = WHITE_FADE_IN;    //choose from LED_STATE
-      Serial.print(destAddr, DEC);
+      Serial.print(current_RFBee, DEC);
       Serial.println(" White..");
       break;
       
@@ -99,7 +106,7 @@ void loop(){
    
     case 2:
       serialData[0] = BLUE_FADE_IN;
-      Serial.print(destAddr, DEC);
+      Serial.print(current_RFBee, DEC);
       Serial.println(" Blue..");
       //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
       break;
@@ -114,7 +121,7 @@ void loop(){
       break;
   }
   
-  transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);  //Config.get(CONFIG_DEST_ADDR));//transmit
+  transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),current_RFBee);  //Config.get(CONFIG_DEST_ADDR));//transmit
   
   //serialData[0] = BOTH_OFF;
   //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);  //Config.get(CONFIG_DEST_ADDR));//transmit 
@@ -134,7 +141,7 @@ void loop(){
   } */
   //Config.set(CONFIG_DEST_ADDR,destAddr);//it's unnecessary   
   
- /* 
+ /* // The Tx Listen to Rxs Code.
   startTime= millis();
   while((millis() >= startTime)&&(millis() - startTime < 20))
   {
@@ -148,10 +155,10 @@ void loop(){
   //if( 0 == response )
     //return;
     
-  destAddr++;//increase the destination address
-  //delay(1000);
-  if(destAddr>maxSlaveAddr){// when reach the max address, return to 2
-    destAddr = 1;
+  current_RFBee++;                   //increase the destination address
+
+  if(current_RFBee > Last_RFBee) {      // when reach the max address, return to 2
+    current_RFBee = First_RFBee;
     //allOver = 1 - allOver;    // if you only have two cases for allOver (0 and 1)
     if(allOver==4)
       allOver=0;

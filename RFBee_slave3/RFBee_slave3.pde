@@ -1,18 +1,19 @@
 /******* Reflecting the Stars *********
-Prototype Test 2 - SLAVE CODE
-Version: 0.1.2
+Prototype Test 3 - SLAVE CODE
+Version: 0.1.3
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
 Date: August 01, 2010
 ----------------------
 Light Display Modes:
 - Pulse Mode.
+- Tx Reset Commands.
 **************************************/
 
-
+/***************** Early Definitions ******************/
 #define FIRMWAREVERSION 11 // 1.1	, version number needs to fit in byte (0~255) to be able to store it into config
 
 #define RTS_ID 2           // The Unique ID of this RFBee.
-char versionblurb[100] = "v.2 - Pulse Mode - SLAVE"; 
+char versionblurb[100] = "v.3 - Reset Commands - SLAVE"; 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
