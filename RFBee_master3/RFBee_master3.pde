@@ -97,7 +97,7 @@ void loop(){
   static long tx_counter = 1;      // Monitors # of Txs for reset purposes.  
   byte response = 0;
   
-  
+  boolean tx_send = true;          // Some cycles we will skip sending.
   
   switch(allOver) {
     case 0: 
@@ -126,22 +126,28 @@ void loop(){
       //serialData[0] = WHITE_FADE_OUT;
       break;
     case 4:
+      tx_send = false;
       if(tx_counter%Tx_Reset_Limit == 0) {
         serialData[0] = RESET;
         Serial.print("R ");
+        tx_send = true;
       }
       break;
     case 5:
+      tx_send = false;
       if(tx_counter%Tx_Reboot_Limit == 0) {
         serialData[0] = REBOOT;
         Serial.print("RB");
+        tx_send = true;
       }
       break;
   }
   
   //Serial.println(" Tx ==> ");
-  tx_counter++;
-  transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),current_RFBee);  //Config.get(CONFIG_DEST_ADDR));//transmit
+  if(tx_send) {
+    tx_counter++;
+    transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),current_RFBee);  //Config.get(CONFIG_DEST_ADDR));//transmit
+  }
   //Serial.print(tx_counter);
   
   // Tx Auto Reset & Reboot Code.
@@ -197,7 +203,8 @@ void loop(){
       allOver=0;
     else
       allOver++;
-    Serial.println(" Tx ==>");
+    if(tx_send)
+      Serial.println(" Tx ==>");
     delay(2000);
   }
   
