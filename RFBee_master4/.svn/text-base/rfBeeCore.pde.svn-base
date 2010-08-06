@@ -136,13 +136,6 @@ void sleepNow(byte mode)
 }
 
 void lowPowerOn(){
-  // Icing's Wake on Rx Registry Code... just in case.
-  CCxWrite(CCx_MCSM2 ,0x01);
-  CCxWrite(CCx_WOREVT1 ,0x28);
-  CCxWrite(CCx_WOREVT0 ,0xA0);
-  CCxWrite(CCx_WORCTRL ,0x38);
-  CCxStrobe(CCx_SRX);    //ccx into wake on radio stat
-  
   DEBUGPRINT()
   CCx.Write(CCx_WORCTRL,0x78);  // set WORCRTL.RC_PD to 0 to enable the wakeup oscillator
   CCx.Strobe(CCx_SWOR);
