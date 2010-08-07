@@ -1,5 +1,5 @@
 /******* Reflecting the Stars *********
-Prototype Test 3 - MASTER CODE
+Prototype Test 4 - MASTER CODE
 Version: 0.1.3
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
 Date: August 04, 2010
@@ -7,6 +7,7 @@ Date: August 04, 2010
 Light Display Modes:
 - Pulse Mode.
 - Tx Reset Commands.
+- Sleep
 **************************************/
 
 /***************** Early Definitions / Variables ******************/
@@ -15,7 +16,7 @@ Light Display Modes:
 #define RTS_ID 0          // The Unique ID of this RFBee.
 byte First_RFBee=1;        // The first RFBee ID in our network
 byte Last_RFBee=30;       // The Maximum amount of Slaves in this Network
-char versionblurb[100] = "v.3 - Reset Commands - MASTER";
+char versionblurb[100] = "v.4 - Sleep when Lonely (no Tx) - MASTER";
 static byte current_RFBee;
 
 #define Tx_Reset_Limit 1000     // After 100 Txs the RFBee should be reset. BECAUSE ITS AN RFBEE.
@@ -85,6 +86,8 @@ void setup(){
     setUartBaudRate();
     rfBeeInit();
     Serial.println(versionblurb);
+    Serial.print("RTS Unique ID: ");
+    Serial.println(RTS_ID, DEC);
     Serial.println("ok");
     current_RFBee = First_RFBee;     // Setup Initial RFBee Address.
     allOver = 0;

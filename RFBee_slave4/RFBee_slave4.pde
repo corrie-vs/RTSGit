@@ -83,6 +83,8 @@ void setup(){
 	setUartBaudRate();
 	rfBeeInit();
         Serial.println(versionblurb);
+        Serial.print("RTS Unique ID: ");
+        Serial.println(RTS_ID, DEC);
 	Serial.println("ok");
 }
 
