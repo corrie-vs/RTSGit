@@ -125,7 +125,7 @@ void loop(){
     case 3:
       //delay(250);
       serialData[0] = BLUE_FADE_OUT;
-      Serial.print("W-");
+      Serial.print("B-");
       //serialData[0] = WHITE_FADE_OUT;
       break;
     case 4:
