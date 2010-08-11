@@ -105,49 +105,7 @@ void loop(){
   
   tx_send = true;
   
-  switch(Command_Counter) {
-    case 0: 
-      serialData[0] = WHITE_FADE_IN;    //choose from LED_STATE
-      //Serial.print(current_RFBee, DEC);
-      Serial.print("W+");
-      break;
-      
-    case 1:
-      serialData[0] = WHITE_FADE_OUT;
-      Serial.print("W-");
-      //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
-      break;
-   
-    case 2:
-      serialData[0] = BLUE_FADE_IN;
-      //Serial.print(current_RFBee, DEC);
-      Serial.print("B+");
-      //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
-      break;
-  
-    case 3:
-      //delay(250);
-      serialData[0] = BLUE_FADE_OUT;
-      Serial.print("B-");
-      //serialData[0] = WHITE_FADE_OUT;
-      break;
-    case 4:
-      tx_send = false;
-      if(tx_counter%Tx_Reset_Limit == 0) {
-        serialData[0] = RESET;
-        Serial.print("R ");
-        tx_send = true;
-      }
-      break;
-    case 5:
-      tx_send = false;
-      if(tx_counter%Tx_Reboot_Limit == 0) {
-        serialData[0] = REBOOT;
-        Serial.print("RB");
-        tx_send = true;
-      }
-      break;
-  }
+  PulseMode();
   
   //Serial.println(" Tx ==> ");
   if(tx_send) {
@@ -300,3 +258,49 @@ byte waitAndProcessRFBeeData()
 }
 
 
+void PulseMode() {
+   switch(Command_Counter) {
+    case 0: 
+      serialData[0] = WHITE_FADE_IN;    //choose from LED_STATE
+      //Serial.print(current_RFBee, DEC);
+      Serial.print("W+");
+      break;
+      
+    case 1:
+      serialData[0] = WHITE_FADE_OUT;
+      Serial.print("W-");
+      //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
+      break;
+   
+    case 2:
+      serialData[0] = BLUE_FADE_IN;
+      //Serial.print(current_RFBee, DEC);
+      Serial.print("B+");
+      //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);//Config.get(CONFIG_DEST_ADDR));//transmit 
+      break;
+  
+    case 3:
+      //delay(250);
+      serialData[0] = BLUE_FADE_OUT;
+      Serial.print("B-");
+      //serialData[0] = WHITE_FADE_OUT;
+      break;
+    case 4:
+      tx_send = false;
+      if(tx_counter%Tx_Reset_Limit == 0) {
+        serialData[0] = RESET;
+        Serial.print("R ");
+        tx_send = true;
+      }
+      break;
+    case 5:
+      tx_send = false;
+      if(tx_counter%Tx_Reboot_Limit == 0) {
+        serialData[0] = REBOOT;
+        Serial.print("RB");
+        tx_send = true;
+      }
+      break;
+  }
+  
+}
