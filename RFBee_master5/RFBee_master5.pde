@@ -98,10 +98,8 @@ void loop(){
   //comment this when as a Master
  
   unsigned long startTime;
-  static long tx_counter = 1;      // Monitors # of Txs for reset purposes.  
   byte response = 0;
   
-  boolean tx_send = true;          // Some cycles we will skip sending.
   
   switch(Command_Counter) {
     case 0: 
@@ -126,7 +124,7 @@ void loop(){
     case 3:
       //delay(250);
       serialData[0] = BLUE_FADE_OUT;
-      Serial.print("W-");
+      Serial.print("B-");
       //serialData[0] = WHITE_FADE_OUT;
       break;
     case 4:
