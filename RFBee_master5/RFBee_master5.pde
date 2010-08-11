@@ -64,7 +64,7 @@ enum LED_STATE{
 };
 
 byte len = 1;              // Length of data to be sent
-static byte allOver = 0;
+static byte Command_Counter = 0;
 
 //================this is for Master RFBee======================
 
@@ -91,7 +91,7 @@ void setup(){
     Serial.println(versionblurb);
     Serial.println("ok");
     current_RFBee = First_RFBee;     // Setup Initial RFBee Address.
-    allOver = 0;
+    Command_Counter = 0;
 }
 
 void loop(){
@@ -103,7 +103,7 @@ void loop(){
   
   boolean tx_send = true;          // Some cycles we will skip sending.
   
-  switch(allOver) {
+  switch(Command_Counter) {
     case 0: 
       serialData[0] = WHITE_FADE_IN;    //choose from LED_STATE
       //Serial.print(current_RFBee, DEC);
@@ -170,7 +170,7 @@ void loop(){
   //transmitData(&serialData[0],len,Config.get(CONFIG_MY_ADDR),destAddr);  //Config.get(CONFIG_DEST_ADDR));//transmit 
  
  /* 
-  if(0 == allOver) {
+  if(0 == Command_Counter) {
     
     serialData[0] = BLUE_FADE_IN;
      Serial.println("Fading Out Blue..");
@@ -202,11 +202,11 @@ void loop(){
 
   if(current_RFBee > Last_RFBee) {      // when reach the max address, return to 2
     current_RFBee = First_RFBee;
-    //allOver = 1 - allOver;    // if you only have two cases for allOver (0 and 1)
-    if(allOver==4)
-      allOver=0;
+    //Command_Counter = 1 - Command_Counter;    // if you only have two cases for Command_Counter (0 and 1)
+    if(Command_Counter==4)
+      Command_Counter=0;
     else
-      allOver++;
+      Command_Counter++;
     if(tx_send)
       Serial.println(" Tx ==>");
     delay(2000);
