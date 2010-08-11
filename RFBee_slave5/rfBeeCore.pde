@@ -136,18 +136,29 @@ void sleepNow(byte mode)
 }
 
 void lowPowerOn(){
-   // Does setting additional registers make a difference? why not try? HOLY SHIT BALLS - 2 mA
-  CCx.Write(CCx_MCSM2 ,0x01);
-  CCx.Write(CCx_WOREVT1 ,0x28);
-  CCx.Write(CCx_WOREVT0 ,0xA0);
-  CCx.Write(CCx_WORCTRL ,0x38);
-  CCx.Strobe(CCx_SRX);    //ccx into wake on radio state
-  // pbbbblllttt...
+ 
+  // Icing's Code - 2 mA
+  CCx.Write(CCx_MCSM2 ,0x00);      // RX_TIME = 0 ⇒ Duty cycle = 12.5 %
+  CCx.Write(CCx_MCSM0,0x18);//(Calibrate when going from IDLE to RX)
+  CCx.Write(CCx_WOREVT1 ,0x28);    // Wake on Radio Event1 - The radio will wake up on Event 0 and issue an RX strobe on Event 1 (pg. 7 from cc1100 wake on radio guide.)
+  CCx.Write(CCx_WOREVT0 ,0xA0);    // Wake on Radio Event0 - reaching Event 0 will turn on the digital regulator and start the crystal oscillator
+  CCx.Write(CCx_WORCTRL ,0x38);    // Wake On Radio Control - event 1 = 3 and wor_res = 0 (pg 4 from cc1100 wake on radio)
+  CCx.Strobe(CCx_SWOR);    //ccx into wake on radio state
   
+  // Page 10 Code Example in Book.
+  /*CCx.Write(CCx_MCSM2 ,0x03);      // RX_TIME = 1 ⇒ Duty cycle = 12.5 %
+  CCx.Write(CCx_WOREVT1 ,0x03);    // Wake on Radio Event1 - The radio will wake up on Event 0 and issue an RX strobe on Event 1 (pg. 7 from cc1100 wake on radio guide.)
+  CCx.Write(CCx_WOREVT0 ,0x20);    // Wake on Radio Event0 - reaching Event 0 will turn on the digital regulator and start the crystal oscillator
+  CCx.Write(CCx_WORCTRL ,0x38);    // Wake On Radio Control - event 1 = 3 and wor_res = 0 (pg 4 from cc1100 wake on radio)
+  delay(3000);
+  CCx.Write(CCx_WORCTRL ,0x30);    // Wake On Radio Control - event 1 = 3 and wor_res = 0 (pg 4 from cc1100 wake on radio)
+  CCx.Strobe(CCx_SWOR);        // Issuing a SWOR strobe command will put the radio in WOR mode when CSn is released given that the radio is in IDLE mode when the strobe command is being issued and the RC oscillator has been enabled by setting WORCTRL.RC_PD = 0.
+  CCx.Strobe(CCx_SRX);             //ccx into wake on radio state
+  */
   DEBUGPRINT()
-  CCx.Write(CCx_WORCTRL,0x78);  // set WORCRTL.RC_PD to 0 to enable the wakeup oscillator
-  CCx.Strobe(CCx_SWOR);
-  sleepNow(SLEEP_MODE_IDLE);
+  //CCx.Write(CCx_WORCTRL,0x78);  // set WORCRTL.RC_PD to 0 to enable the wakeup oscillator (XOSC)
+  //sleepNow(SLEEP_MODE_IDLE);
+  //CCx.Strobe(CCx_SWOR);        // Issuing a SWOR strobe command will put the radio in WOR mode when CSn is released given that the radio is in IDLE mode when the strobe command is being issued and the RC oscillator has been enabled by setting WORCTRL.RC_PD = 0.
   //CCx.Strobe(CCx_SIDLE);
 }
 
