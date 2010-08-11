@@ -13,7 +13,7 @@ Light Display Modes:
 /***************** Early Definitions ******************/
 #define FIRMWAREVERSION 11 // 1.1	, version number needs to fit in byte (0~255) to be able to store it into config
 
-#define RTS_ID 15           // The Unique ID of this RFBee.
+#define RTS_ID 2           // The Unique ID of this RFBee.
 char versionblurb[100] = "v.4 - Rx Sleep when Lonely - SLAVE"; 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
