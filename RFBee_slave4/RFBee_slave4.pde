@@ -1,7 +1,7 @@
 /******* Reflecting the Stars *********
 Prototype Test 4 - SLAVE CODE
 Version: 0.1.4
-Authors: Richard Schwab, Corrie Van Sice, Icing Chang
+Authors: Richard Schwab, Corrie Van Sice, Icing Chang, Adam Berenzweig
 Date: August 05, 2010
 ----------------------
 Light Display Modes:
@@ -32,19 +32,36 @@ char versionblurb[100] = "v.4 - Rx Sleep when Lonely - SLAVE";
 
 #define GDO0 2 // used for polling the RF received data
 
-#define blue 5
-#define white 6
+//#define blue_pin 5
+//#define white_pin 6
 #define SolarPin 7//used for what?
 #define SolarValue 0
-#define FADE_IN 0
-#define FADE_OUT 1
 
 #define rx_lonely_sleep 30000 // Amount of loops to go through without Tx before the Rx goes to sleep.
 int rx_lonely_counter=0;
 int misc_counter=0;
 
+// FIXME macros or global ints?
+#define FADE_INTERVAL_MS 30
+#define FADE_INCREMENT 5
+#define MAX_FADE_VALUE 255
+#define MIN_FADE_VALUE 0
+
+enum LEDS {
+  blue,
+  white,
+  NUM_LEDS
+};
+
+// FIXME classes in arduino? want to encapsulate this.
+int led_state[NUM_LEDS];
+int fade_value[NUM_LEDS];
+int pin_number[NUM_LEDS];
+
+unsigned long last_led_control_time;
+
 //led states to be controlled to
-enum LED_STATE{
+enum RTS_COMMAND {
 	BLUE_ON = 1,
 	WHITE_ON,
 	BOTH_ON,
@@ -60,16 +77,25 @@ enum LED_STATE{
         RESET,
         REBOOT
 };
+
+// What a LED is doing right now.
+enum LED_STATE {
+  LED_OFF,
+  LED_ON,
+  FADE_IN,
+  FADE_OUT
+};
+
 //===================this is for slave RFBee==================
 
 void setup(){
 	//do extra initalization
-	Config.set(CONFIG_MY_ADDR,RTS_ID);			//modify the numberf to specify an unique address for RFBee itself 
+	Config.set(CONFIG_MY_ADDR,RTS_ID);        //modify the numberf to specify an unique address for RFBee itself 
 	setMyAddress();
 	Config.set(CONFIG_ADDR_CHECK,2);	 //set slave RFBee with adress checking and broadcast
 	setAddressCheck();
 	//==========================
-	
+
 	if (Config.initialized() != OK) 
 	{
 		Serial.begin(9600);
@@ -82,10 +108,21 @@ void setup(){
 	}
 	setUartBaudRate();
 	rfBeeInit();
+        InitLedStates();
         Serial.println(versionblurb);
         Serial.print("RTS Unique ID: ");
         Serial.println(RTS_ID, DEC);
 	Serial.println("ok");
+}
+
+void InitLedStates() {
+   pin_number[blue] = 5;
+   pin_number[white] = 6;
+   for (int i = 0; i < NUM_LEDS; ++i) {
+     fade_value[i] = MIN_FADE_VALUE;
+     led_state[i] = LED_OFF;
+   }
+  last_led_control_time = millis();
 }
 
 void loop(){
@@ -102,7 +139,7 @@ void loop(){
 		result = waitAndReceiveRFBeeData();
 	}
         else {    // If no Tx, we're either under water or just not active so go to sleep.
-          if(misc_counter%12 == 0) {
+          if (misc_counter % 12 == 0) {
             misc_counter=0;
             rx_lonely_counter++;
             if(rx_lonely_counter%10000 == 0) {
@@ -112,17 +149,23 @@ void loop(){
           }
         }
 	if( result != 0){
-		transmitData(&response,1,Config.get(CONFIG_MY_ADDR),1);//transmit 'K' to the master repersenting 'ok'
+		//transmitData(&response,1,Config.get(CONFIG_MY_ADDR),1);//transmit 'K' to the master repersenting 'ok'
 		processRFBeeData(result);
 	}
 
+        MaybeRunLedControl();
+
+
         // Lonely Timer - for when the Rx no longer hears from the Tx, it will go to sleep.
+        /*
         if((rx_lonely_counter == rx_lonely_sleep)) {
           Serial.println("");
           Serial.println("Going to Sleep...");
           TurnOffLightsNice();
           lowPowerOn();    // Only drops to 20ma from 24ma operating
         }
+        */
+        
 	/*
 	if (Serial.available() > 0){
 	 sleepCounter=1000; // reset the sleep counter
@@ -144,7 +187,6 @@ void loop(){
 	 if ((sleepCounter == 0) && (Config.get(CONFIG_RFBEE_MODE) == LOWPOWER_MODE))
 	 lowPowerOn();
 	 */
-
 }
 
 
@@ -193,84 +235,126 @@ byte waitAndReceiveRFBeeData()
 	return rxData[0];
 }
 
-//if want to control the specific pin, the pinNum1 or pinNum2 should be
-//the corresponding pin number of Arduino, otherwise set pinNum to 0;
-// control:0- fade in,1-fade out
-void ledControl(int pinNum1, int control1, int pinNum2, int control2)
-{
-	for(int fadeValue = 0 ; fadeValue <= 255; fadeValue +=5){
-		if(pinNum1 > 0 ){
-			if(FADE_IN == control1 ){// fade in
-				analogWrite(pinNum1,fadeValue);
-			}
-			else{//fade out
-				analogWrite(pinNum1,255-fadeValue);
-			}
-		}
-		if(pinNum2 > 0 ){
-			if(FADE_IN == control2 ){// fade in
-				analogWrite(pinNum2,fadeValue);
-			}
-			else{//fade out
-				analogWrite(pinNum2,255-fadeValue);
-			}
-		}
-		delay(30);
-	}
+
+void MaybeRunLedControl() {
+  unsigned long now = millis();
+  if (now < last_led_control_time) {
+    // time overflow, happens every 50 days
+    last_led_control_time = 0;
+  }
+  if (now < FADE_INTERVAL_MS) {
+    // Don't underflow the subtraction.
+    return;
+  }
+  if (last_led_control_time < now - FADE_INTERVAL_MS) {
+    last_led_control_time = now;
+    LedControlTimeSlice();
+  }
 }
 
+// Each led has a state:  { LED_OFF, LED_ON, FADE_IN, FADE_OUT }
+// and a value (fade_value[led]).
+// ledControlTimeSlice is called every N milliseconds.  It looks at each state and either:
+//   LED_OFF, LED_ON: do nothing
+//   FADE_IN, OUT: increment or decrement fadeValue and analogWrite, until hit limit (0, 255), then switch state to OFF/ON.
+void LedControlTimeSlice() {
+  for (int led = 0; led < NUM_LEDS; ++led) {
+    switch (led_state[led]) {
+      case LED_OFF:
+        break;
+      case LED_ON:
+        break;
+      case FADE_IN:
+        fade_value[led] += FADE_INCREMENT;
+        if (fade_value[led] >= MAX_FADE_VALUE) {
+          fade_value[led] = MAX_FADE_VALUE;
+          led_state[led] = LED_ON;
+        }
+        analogWrite(pin_number[led], fade_value[led]);
+        break;
+      case FADE_OUT:
+        fade_value[led] -= FADE_INCREMENT;
+        if (fade_value[led] <= MIN_FADE_VALUE) {
+          fade_value[led] = MIN_FADE_VALUE;
+          led_state[led] = LED_OFF;
+        }
+        analogWrite(pin_number[led], fade_value[led]);
+        break;
+    }
+  }
+}
+
+void SetLedState(int led, int state) {
+  led_state[led] = state;
+  Serial.print("Set led ");
+  Serial.print(led, DEC);
+  Serial.print(" to state ");
+  Serial.println(state, DEC);
+}
 
 void TurnOffLightsNice() {
  if(analogRead(white) > 120)
-  ledControl(white, FADE_OUT, 0, FADE_OUT); //blue fade out, white unchanged
+   SetLedState(white, FADE_OUT);
  if(analogRead(blue) > 120)
-  ledControl(blue, FADE_OUT, 0, FADE_OUT); //blue fade out, white unchanged
+   SetLedState(blue, FADE_OUT);
 }
 
 void processRFBeeData( byte RFData)
 {
+  // FIXME: MAX_FADE_VALUE, etc
+  // FIXME: Don't really need to analogWrite here, will pick up the state change in the next LedControlTimeSlice.
 	switch (RFData){
 	case BLUE_ON:
-		analogWrite(blue,255);//open blue led
+		analogWrite(pin_number[blue],255);
+                SetLedState(blue, LED_ON);
 		break;
 	case WHITE_ON:
-		analogWrite(white,255);//open white led
+                SetLedState(white, LED_ON);
+		analogWrite(pin_number[white],255);
 		break;
 	case BOTH_ON:
-		analogWrite(blue,255);//open both leds
-		analogWrite(white,255);
+                SetLedState(blue, LED_ON);
+                SetLedState(white, LED_ON);
+		analogWrite(pin_number[blue],255);
+		analogWrite(pin_number[white],255);
 		break;
 	case BLUE_OFF:
-		analogWrite(blue,0);//close blue led
+                SetLedState(blue, LED_OFF);
+		analogWrite(pin_number[blue],0);
 		break;
 	case WHITE_OFF:
-		analogWrite(white,0);//close white led
+                SetLedState(white, LED_OFF);
+		analogWrite(pin_number[white],0);
 		break;
 	case BOTH_OFF:
-		analogWrite(blue,0);//close both leds
-		analogWrite(white,0);
+                SetLedState(blue, LED_OFF);
+                SetLedState(white, LED_OFF);
+		analogWrite(pin_number[blue],0);
+		analogWrite(pin_number[white],0);
 		break;
 	case BLUE_FADE_IN:
-		ledControl(blue, FADE_IN, 0, FADE_IN);//blue fade in, white unchanged
+                SetLedState(blue, FADE_IN);
 		Serial.println("Blue Fade In");
 		break;
 	case WHITE_FADE_IN:
-		ledControl(0, FADE_IN, white, FADE_IN);//white fade in, blue unchanged
+                SetLedState(white, FADE_IN);
 		Serial.println("White Fade In");
 		break;
 	case BLUE_FADE_OUT:
-		ledControl(blue, FADE_OUT, 0, FADE_OUT);//blue fade out, white unchanged
+                SetLedState(blue, FADE_OUT);
 		Serial.println("Blue Fade Out");
 		break;
 	case WHITE_FADE_OUT:
-		ledControl(0, FADE_OUT, white, FADE_OUT);//white fade out, blue unchanged
+                SetLedState(white, FADE_OUT);
 		Serial.println("White Fade Out");
 		break;
 	case BOTH_FADE_IN:
-		ledControl(blue, FADE_IN, white, FADE_IN);//both fade in
-		break;
+                SetLedState(white, FADE_IN);
+                SetLedState(blue, FADE_IN);
+                break;
 	case BOTH_FADE_OUT:
-		ledControl(blue, FADE_OUT, white, FADE_OUT);//both fade out
+                SetLedState(white, FADE_OUT);
+                SetLedState(blue, FADE_OUT);
 		break;
         case RESET:
                 Serial.println("Resetting RFBee.");

@@ -1,6 +1,6 @@
 /******* Reflecting the Stars *********
 Prototype Test 4 - MASTER CODE
-Version: 0.1.3
+Version: 0.1.4
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
 Date: August 04, 2010
 ----------------------
@@ -13,9 +13,9 @@ Light Display Modes:
 /***************** Early Definitions / Variables ******************/
 #define FIRMWAREVERSION 11 // 1.1  , version number needs to fit in byte (0~255) to be able to store it into config
 
-#define RTS_ID 0          // The Unique ID of this RFBee.
-byte First_RFBee=1;        // The first RFBee ID in our network
-byte Last_RFBee=30;       // The Maximum amount of Slaves in this Network
+#define RTS_ID 1          // The Unique ID of this RFBee.
+byte First_RFBee=2;        // The first RFBee ID in our network
+byte Last_RFBee=3;       // The Maximum amount of Slaves in this Network
 char versionblurb[100] = "v.4 - Sleep when Lonely (no Tx) - MASTER";
 static byte current_RFBee;
 
@@ -125,7 +125,7 @@ void loop(){
     case 3:
       //delay(250);
       serialData[0] = BLUE_FADE_OUT;
-      Serial.print("W-");
+      Serial.print("B-");
       //serialData[0] = WHITE_FADE_OUT;
       break;
     case 4:
