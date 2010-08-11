@@ -109,7 +109,7 @@ void loop(){
    
    serialData[0] = TWINKLE;
    Serial.print("T ");
-  
+   
    //-------------- Send Light Show Commands to Rxs. -------------
   //Serial.println(" Tx ==> ");
   if(tx_send) {
@@ -175,7 +175,7 @@ void loop(){
       Command_Counter++;
     if(tx_send)
       Serial.println(" Tx ==>");
-    delay(2000);
+    delay(6000);
   }
   
   //Serial.println("Sending to: ");
