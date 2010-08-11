@@ -197,7 +197,7 @@ byte waitAndReceiveRFBeeData()
 //if want to control the specific pin, the pinNum1 or pinNum2 should be
 //the corresponding pin number of Arduino, otherwise set pinNum to 0;
 // control:0- fade in,1-fade out
-void ledControl(int pinNum1, int control1, int pinNum2, int control2)
+void ledControl(int pinNum1, int control1, int pinNum2, int control2, int duration)
 {
 	for(int fadeValue = 0 ; fadeValue <= 255; fadeValue +=5){
 		if(pinNum1 > 0 ){
@@ -216,16 +216,16 @@ void ledControl(int pinNum1, int control1, int pinNum2, int control2)
 				analogWrite(pinNum2,255-fadeValue);
 			}
 		}
-		delay(30);
+		delay(duration);
 	}
 }
 
 
 void TurnOffLightsNice() {
  if(analogRead(white) > 120)
-  ledControl(white, FADE_OUT, 0, FADE_OUT); //blue fade out, white unchanged
+  ledControl(white, FADE_OUT, 0, FADE_OUT, 30); //blue fade out, white unchanged
  if(analogRead(blue) > 120)
-  ledControl(blue, FADE_OUT, 0, FADE_OUT); //blue fade out, white unchanged
+  ledControl(blue, FADE_OUT, 0, FADE_OUT, 30); //blue fade out, white unchanged
 }
 
 void processRFBeeData( byte RFData)
@@ -252,26 +252,26 @@ void processRFBeeData( byte RFData)
 		analogWrite(white,0);
 		break;
 	case BLUE_FADE_IN:
-		ledControl(blue, FADE_IN, 0, FADE_IN);//blue fade in, white unchanged
+		ledControl(blue, FADE_IN, 0, FADE_IN, 30);//blue fade in, white unchanged
 		Serial.println("Blue Fade In");
 		break;
 	case WHITE_FADE_IN:
-		ledControl(0, FADE_IN, white, FADE_IN);//white fade in, blue unchanged
+		ledControl(0, FADE_IN, white, FADE_IN, 30);//white fade in, blue unchanged
 		Serial.println("White Fade In");
 		break;
 	case BLUE_FADE_OUT:
-		ledControl(blue, FADE_OUT, 0, FADE_OUT);//blue fade out, white unchanged
+		ledControl(blue, FADE_OUT, 0, FADE_OUT, 30);//blue fade out, white unchanged
 		Serial.println("Blue Fade Out");
 		break;
 	case WHITE_FADE_OUT:
-		ledControl(0, FADE_OUT, white, FADE_OUT);//white fade out, blue unchanged
+		ledControl(0, FADE_OUT, white, FADE_OUT, 30);//white fade out, blue unchanged
 		Serial.println("White Fade Out");
 		break;
 	case BOTH_FADE_IN:
-		ledControl(blue, FADE_IN, white, FADE_IN);//both fade in
+		ledControl(blue, FADE_IN, white, FADE_IN, 30);//both fade in
 		break;
 	case BOTH_FADE_OUT:
-		ledControl(blue, FADE_OUT, white, FADE_OUT);//both fade out
+		ledControl(blue, FADE_OUT, white, FADE_OUT, 30);//both fade out
 		break;
         case RESET:
                 Serial.println("Resetting RFBee.");
@@ -303,9 +303,9 @@ void Spars_Twinkle() {
   int color = rand() % 1;  // pick a color: 0 = blue, 1 = white.
   int random_brightness = rand() % (155) + 100;  // twinkle brightness between 100 and 255.
   
-  ledControl(blue*(1-color), FADE_IN, white*color, FADE_IN);//white fade in, blue unchanged
+  ledControl(blue*(1-color), FADE_IN, white*color, FADE_IN, spars_duration);//white fade in, blue unchanged
   delay(spars_duration);
-  ledControl(blue*(1-color), FADE_OUT, white*color, FADE_OUT);  
+  ledControl(blue*(1-color), FADE_OUT, white*color, FADE_OUT, spars_duration);  
 }
 
 
