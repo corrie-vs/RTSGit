@@ -8,6 +8,7 @@ Light Display Modes:
 - Pulse Mode.
 - Tx Reset Commands.
 - Sleep.
+- Twinkle
 **************************************/
 
 /***************** Early Definitions ******************/
@@ -58,7 +59,9 @@ enum LED_STATE{
 	BOTH_FADE_IN,
 	BOTH_FADE_OUT,
         RESET,
-        REBOOT
+        REBOOT,
+        TWINKLE,
+        CONSTELLATIONS
 };
 //===================this is for slave RFBee==================
 

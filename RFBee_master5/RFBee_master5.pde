@@ -7,6 +7,8 @@ Date: August 04, 2010
 Light Display Modes:
 - Pulse Mode.
 - Tx Reset Commands.
+- Sleep
+- Twinkle
 **************************************/
 
 /***************** Early Definitions / Variables ******************/
@@ -56,7 +58,9 @@ enum LED_STATE{
   BOTH_FADE_IN,
   BOTH_FADE_OUT,
   RESET,
-  REBOOT
+  REBOOT,
+  TWINKLE,
+  CONSTELLATIONS
 };
 
 byte len = 1;              // Length of data to be sent
