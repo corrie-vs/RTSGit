@@ -1,6 +1,6 @@
 /******* Reflecting the Stars *********
-Prototype Test 4 - SLAVE CODE
-Version: 0.1.4
+Prototype Test 5 - SLAVE CODE
+Version: 0.1.5
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
 Date: August 05, 2010
 ----------------------
@@ -14,7 +14,7 @@ Light Display Modes:
 #define FIRMWAREVERSION 11 // 1.1	, version number needs to fit in byte (0~255) to be able to store it into config
 
 #define RTS_ID 2           // The Unique ID of this RFBee.
-char versionblurb[100] = "v.4 - Rx Sleep when Lonely - SLAVE"; 
+char versionblurb[100] = "v.5 - Rx Twinkle + Constellations - SLAVE"; 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 

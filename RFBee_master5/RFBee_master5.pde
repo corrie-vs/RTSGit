@@ -1,6 +1,6 @@
 /******* Reflecting the Stars *********
-Prototype Test 3 - MASTER CODE
-Version: 0.1.3
+Prototype Test 5 - MASTER CODE
+Version: 0.1.5
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
 Date: August 04, 2010
 ----------------------
@@ -15,7 +15,7 @@ Light Display Modes:
 #define RTS_ID 0          // The Unique ID of this RFBee.
 byte First_RFBee=1;        // The first RFBee ID in our network
 byte Last_RFBee=30;       // The Maximum amount of Slaves in this Network
-char versionblurb[100] = "v.3 - Reset Commands - MASTER";
+char versionblurb[100] = "v.5 - Twinkle Commands - MASTER";
 static byte current_RFBee;
 
 #define Tx_Reset_Limit 1000     // After 100 Txs the RFBee should be reset. BECAUSE ITS AN RFBEE.
