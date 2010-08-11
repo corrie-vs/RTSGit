@@ -2,7 +2,6 @@
 Prototype Test 5 - SLAVE CODE
 Version: 0.1.5
 Authors: Richard Schwab, Corrie Van Sice, Icing Chang
-Date: August 10, 2010
 ----------------------
 Light Display Modes:
 - Pulse Mode.
@@ -13,8 +12,8 @@ Light Display Modes:
 /***************** Early Definitions ******************/
 #define FIRMWAREVERSION 11 // 1.1	, version number needs to fit in byte (0~255) to be able to store it into config
 
-#define RTS_ID 15           // The Unique ID of this RFBee.
-char versionblurb[100] = "v.5 - Rx Sleep when Lonely - SLAVE"; 
+#define RTS_ID 2           // The Unique ID of this RFBee.
+char versionblurb[100] = "v.4 - Rx Sleep when Lonely - SLAVE"; 
 //#define FACTORY_SELFTEST
 //#define INTERRUPT_RECEIVE
 //#define DEBUG 
@@ -82,6 +81,10 @@ void setup(){
 	}
 	setUartBaudRate();
 	rfBeeInit();
+        
+        //here make RFBee into WOR, --by Icing, 2010.8.7
+        lowPowerOn();
+        
         Serial.println(versionblurb);
         Serial.print("RTS Unique ID: ");
         Serial.println(RTS_ID, DEC);
@@ -187,7 +190,6 @@ byte waitAndReceiveRFBeeData()
 
 	if (result == NOTHING)
 		return 0;
-
 	//Serial.write(rxData,len);
 	//Serial.print(rxData[0],HEX);
 	return rxData[0];
@@ -252,19 +254,15 @@ void processRFBeeData( byte RFData)
 		break;
 	case BLUE_FADE_IN:
 		ledControl(blue, FADE_IN, 0, FADE_IN);//blue fade in, white unchanged
-		Serial.println("Blue Fade In");
 		break;
 	case WHITE_FADE_IN:
 		ledControl(0, FADE_IN, white, FADE_IN);//white fade in, blue unchanged
-		Serial.println("White Fade In");
 		break;
 	case BLUE_FADE_OUT:
 		ledControl(blue, FADE_OUT, 0, FADE_OUT);//blue fade out, white unchanged
-		Serial.println("Blue Fade Out");
 		break;
 	case WHITE_FADE_OUT:
 		ledControl(0, FADE_OUT, white, FADE_OUT);//white fade out, blue unchanged
-		Serial.println("White Fade Out");
 		break;
 	case BOTH_FADE_IN:
 		ledControl(blue, FADE_IN, white, FADE_IN);//both fade in
@@ -286,7 +284,6 @@ void processRFBeeData( byte RFData)
 		break;										
 	}
 }
-
 
 
 
