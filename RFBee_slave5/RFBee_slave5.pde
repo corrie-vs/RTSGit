@@ -103,7 +103,7 @@ void loop(){
 		result = waitAndReceiveRFBeeData();
 	}
         else {    // If no Tx, we're either under water or just not active so go to sleep.
-          if(misc_counter%12 == 0) {
+          if(misc_counter%20 == 0) {
             misc_counter=0;
             rx_lonely_counter++;
             if(rx_lonely_counter%10000 == 0) {
@@ -283,6 +283,12 @@ void processRFBeeData( byte RFData)
                 Serial.println("");
                 Config.reset();
                 break;
+        case TWINKLE:
+                Serial.println("Twinkling...");
+                for(int i=0;i<5;i++)
+                  Spars_Twinkle();
+                break;
+                
 	default:
 		break;										
 	}
