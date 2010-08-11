@@ -99,14 +99,16 @@ void setup(){
 
 void loop(){
   //comment this when as a Master
- 
+  //-------------- Variables -------------
   unsigned long startTime;
   byte response = 0;
-  
   tx_send = true;
   
+   //-------------- Prep Light Show Commands -------------
   PulseMode();
   
+  
+   //-------------- Send Light Show Commands to Rxs. -------------
   //Serial.println(" Tx ==> ");
   if(tx_send) {
     tx_counter++;
@@ -114,6 +116,8 @@ void loop(){
   }
   //Serial.print(tx_counter);
   
+  
+   //-------------- Prep Reset / Reboot Commands to Rxs. -------------
   // Tx Auto Reset & Reboot Code.
   if(tx_counter%Tx_Reset_Limit == 0) {
     Serial.println("");
@@ -304,3 +308,24 @@ void PulseMode() {
   }
   
 }
+
+
+void Spars_Twinkle() {
+  Serial.println("Basic Twinkle Pattern.");
+  
+  int spars_chance = rand() % (100);
+  if(spars_chance > 20) {
+    return;
+  }
+  
+  int low = 10;    // shortest twinkle time = 0+2s
+  int range = 20;  // longest twinkle time = 2+2s  (but we have 51 iterations (255/5) and so 30ms delays causes 1.5s fade times. 
+  int spars_duration = rand() % (range) + low;  // twinkle duration between 2 and 4 seconds.
+  int color = rand() % 1;  // pick a color: 0 = blue, 1 = white.
+  int random_brightness = rand() % (155) + 100;  // twinkle brightness between 100 and 255.
+  
+  ledControl(blue*(1-color), FADE_IN, white*color, FADE_IN, spars_duration);//white fade in, blue unchanged
+  delay(spars_duration);
+  ledControl(blue*(1-color), FADE_OUT, white*color, FADE_OUT, spars_duration);  
+}
+
