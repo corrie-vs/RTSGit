@@ -65,6 +65,9 @@ enum LED_STATE{
 
 byte len = 1;              // Length of data to be sent
 static byte Command_Counter = 0;
+static long tx_counter = 1;      // Monitors # of Txs for reset purposes.  
+boolean tx_send = true;          // Some cycles we will skip sending.
+  
 
 //================this is for Master RFBee======================
 
