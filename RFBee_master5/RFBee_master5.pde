@@ -103,6 +103,7 @@ void loop(){
   unsigned long startTime;
   byte response = 0;
   
+  tx_send = true;
   
   switch(Command_Counter) {
     case 0: 
